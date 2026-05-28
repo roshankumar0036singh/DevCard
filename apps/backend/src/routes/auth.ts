@@ -66,13 +66,11 @@ export async function authRoutes(app: FastifyInstance) {
   app.get('/github/callback', async (request: FastifyRequest<{ Querystring: OAuthCallbackQuery }>, reply: FastifyReply) => {
     const { code, state } = request.query;
 
-    // Validate state to prevent CSRF attacks
-    const storedState = (request.cookies as any).oauth_state;
-    reply.clearCookie('oauth_state', { path: '/' });
-
-    if (!storedState || !state || state !== storedState) {
-      return reply.status(400).send({ error: 'Invalid OAuth state parameter.' });
+    const storedState = request.cookies?.oauth_state;
+    if (!state || !storedState || state !== storedState) {
+      return reply.status(400).send({ error: 'Invalid or missing OAuth state — possible CSRF attack' });
     }
+    reply.clearCookie('oauth_state', { path: '/' });
 
     if (!code) {
       return reply.status(400).send({ error: 'Missing authorization code' });
@@ -217,13 +215,11 @@ export async function authRoutes(app: FastifyInstance) {
   app.get('/google/callback', async (request: FastifyRequest<{ Querystring: OAuthCallbackQuery }>, reply: FastifyReply) => {
     const { code, state } = request.query;
 
-    // Validate state to prevent CSRF attacks
-    const storedState = (request.cookies as any).oauth_state;
-    reply.clearCookie('oauth_state', { path: '/' });
-
-    if (!storedState || !state || state !== storedState) {
-      return reply.status(400).send({ error: 'Invalid OAuth state parameter.' });
+    const storedState = request.cookies?.oauth_state;
+    if (!state || !storedState || state !== storedState) {
+      return reply.status(400).send({ error: 'Invalid or missing OAuth state — possible CSRF attack' });
     }
+    reply.clearCookie('oauth_state', { path: '/' });
 
     if (!code) {
       return reply.status(400).send({ error: 'Missing authorization code' });
